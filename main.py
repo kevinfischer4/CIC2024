@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+import json
 
 START_IMAGE_NUMBER = 13
 REFERENCE_IMAGE_NUMBER = 12
@@ -68,63 +69,107 @@ def findRectangle(image_path, show_image=False):
 
 
 
-image_path = 'IMG/12_1.jpg'
+image_path_closed = 'IMG/12'
 
-def test(image_path):
-    # Load the image
-    image = cv2.imread(image_path)
+def calibrate(image_path_closed):
 
-    # Convert the image to HSV color space for color detection
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    values = []
 
-    # Define parameters for red color detection in HSV
-    lower_red = np.array([0, 120, 70])
-    upper_red = np.array([10, 255, 255])
-    mask1 = cv2.inRange(hsv_image, lower_red, upper_red)
+    for i in range(1,4):
+        image_path = image_path_closed + '_' + str(i) + '.jpg'
 
-    # Range for upper red
-    lower_red = np.array([170, 120, 70])
-    upper_red = np.array([180, 255, 255])
-    mask2 = cv2.inRange(hsv_image, lower_red, upper_red)
+        # Load the image
+        image = cv2.imread(image_path)
 
-    # Combine both masks
-    mask = mask1 + mask2
+        # Convert the image to HSV color space for color detection
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Find contours in the mask
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Define parameters for red color detection in HSV
+        lower_red = np.array([0, 120, 70])
+        upper_red = np.array([10, 255, 255])
+        mask1 = cv2.inRange(hsv_image, lower_red, upper_red)
 
-    # Filter contours based on size and store bounding boxes
-    levers = []
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        if w * h > 50:  # Filter out very small contours
-            levers.append((x, y, w, h))
+        # Range for upper red
+        lower_red = np.array([170, 120, 70])
+        upper_red = np.array([180, 255, 255])
+        mask2 = cv2.inRange(hsv_image, lower_red, upper_red)
 
-    # Calculate the approximate center of the bounding boxes for ordering purposes
-    center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
-    center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
+        # Combine both masks
+        mask = mask1 + mask2
 
-    # Find the lever closest to the top-right as the starting point
-    top_right_lever = sorted(levers, key=lambda lever: (-lever[0], lever[1]))[0]
-    top_right_x = top_right_lever[0] + top_right_lever[2] / 2
-    top_right_y = top_right_lever[1] + top_right_lever[3] / 2
+        # Find contours in the mask
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Sort the levers in clockwise order starting from the top-right lever
-    sorted_levers = sorted(
-        levers,
-        key=lambda lever: (
-            np.arctan2(lever[1] + lever[3] / 2 - top_right_y, lever[0] + lever[2] / 2 - top_right_x) % (2 * np.pi)
+        # Filter contours based on size and store bounding boxes
+        levers = []
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            if w * h > 50:  # Filter out very small contours
+                levers.append((x, y, w, h))
+
+        # Calculate the approximate center of the bounding boxes for ordering purposes
+        center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
+        center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
+
+        # Find the lever closest to the top-right as the starting point
+        top_right_lever = sorted(levers, key=lambda lever: (-lever[0], lever[1]))[0]
+        top_right_x = top_right_lever[0] + top_right_lever[2] / 2
+        top_right_y = top_right_lever[1] + top_right_lever[3] / 2
+
+        # Sort the levers in clockwise order starting from the top-right lever
+        sorted_levers = sorted(
+            levers,
+            key=lambda lever: (
+                np.arctan2(lever[1] + lever[3] / 2 - top_right_y, lever[0] + lever[2] / 2 - top_right_x) % (2 * np.pi)
+            )
         )
-    )
 
-    # Prepare JSON with max dimension (either width or height) for each lever
-    lever_dimensions = {f"Lever{i}": max(w, h) for i, (x, y, w, h) in enumerate(sorted_levers)}
+
+        # Prepare JSON with max dimension (either width or height) for each lever
+        # Format should look like: {"Lever0": {"close": 100}, "Lever1": {"close": 200}, ...}  
+        for i, (x, y, w, h) in enumerate(sorted_levers):
+            if values == []:
+                values = [[] for _ in range(len(sorted_levers))] 
+                values[i] = [max(w, h)]
+            else:
+                values[i].append(max(w, h))
+
+
+        # Draw bounding boxes on the image
+        for x, y, w, h in sorted_levers:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(image, f'{w} x {h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+            
+        # Display the image
+        '''plt.figure(figsize=(10, 10))
+        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        plt.axis('off')
+        plt.show()'''
+
+    print(values)
+
+    lever_dimensions = {}
+
+    # Calculate the average of the max dimensions for each lever
+    for i, lever_values in enumerate(values):
+        lever_dimensions[f'Lever{i}'] = {
+            'close': int(np.mean(lever_values)),
+            'stop': None,
+            'mid': None,
+            'open': None
+        }
+        
+
+    # Write the lever dimensions to a JSON file
+    with open('lever_dimensions.json', 'w') as f:
+        json.dump(lever_dimensions, f, indent=4)
+        
     print(lever_dimensions)
+    return lever_dimensions
 
 
 
 
-
-test(image_path)
+calibrate(image_path_closed)
 
 #findRectangle(image_path, show_image=True)
