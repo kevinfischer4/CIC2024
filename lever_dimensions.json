@@ -1,62 +1,62 @@
 {
     "Lever0": {
-        "close": 80,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 81,
+        "stop": 99,
+        "mid": 125,
+        "open": 121
     },
     "Lever1": {
-        "close": 78,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 62,
+        "stop": 82,
+        "mid": 118,
+        "open": 119
     },
     "Lever2": {
-        "close": 62,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 64,
+        "stop": 84,
+        "mid": 121,
+        "open": 118
     },
     "Lever3": {
-        "close": 63,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 64,
+        "stop": 86,
+        "mid": 126,
+        "open": 121
     },
     "Lever4": {
-        "close": 60,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 80,
+        "stop": 104,
+        "mid": 125,
+        "open": 146
     },
     "Lever5": {
-        "close": 82,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 78,
+        "stop": 100,
+        "mid": 125,
+        "open": 148
     },
     "Lever6": {
-        "close": 81,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 62,
+        "stop": 82,
+        "mid": 122,
+        "open": 129
     },
     "Lever7": {
-        "close": 62,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 63,
+        "stop": 82,
+        "mid": 117,
+        "open": 129
     },
     "Lever8": {
-        "close": 64,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 60,
+        "stop": 78,
+        "mid": 110,
+        "open": 125
     },
     "Lever9": {
-        "close": 64,
-        "stop": null,
-        "mid": null,
-        "open": null
+        "close": 82,
+        "stop": 100,
+        "mid": 124,
+        "open": 124
     }
 }

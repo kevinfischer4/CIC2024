@@ -68,10 +68,7 @@ def findRectangle(image_path, show_image=False):
         plt.show()
 
 
-
-image_path_closed = 'IMG/12'
-
-def calibrate(image_path_closed):
+def calibrate(image_path_closed, position, lever_number):
 
     values = []
 
@@ -104,72 +101,116 @@ def calibrate(image_path_closed):
         levers = []
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if w * h > 50:  # Filter out very small contours
+            if w * h > 1500:  # Filter out very small contours
                 levers.append((x, y, w, h))
 
         # Calculate the approximate center of the bounding boxes for ordering purposes
-        center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
-        center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
+        #center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
+        #center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
 
-        # Find the lever closest to the top-right as the starting point
-        top_right_lever = sorted(levers, key=lambda lever: (-lever[0], lever[1]))[0]
-        top_right_x = top_right_lever[0] + top_right_lever[2] / 2
-        top_right_y = top_right_lever[1] + top_right_lever[3] / 2
 
-        # Sort the levers in clockwise order starting from the top-right lever
-        sorted_levers = sorted(
-            levers,
-            key=lambda lever: (
-                np.arctan2(lever[1] + lever[3] / 2 - top_right_y, lever[0] + lever[2] / 2 - top_right_x) % (2 * np.pi)
-            )
-        )
+        # get width and height of the image
+        height, width, _ = image.shape
+
+        # draw a point at the center of the image
+        cv2.circle(image, (width // 2, height // 2), 5, (0, 0, 255), -1)
+
+        # sort the levers based on the angle between the center of the image and the center of the bounding box starting from the top right
+        sorted_levers = sorted(levers, key=lambda lever: np.arctan2(lever[1] - height // 2, lever[0] - width // 2))
+
+        
 
 
         # Prepare JSON with max dimension (either width or height) for each lever
         # Format should look like: {"Lever0": {"close": 100}, "Lever1": {"close": 200}, ...}  
-        for i, (x, y, w, h) in enumerate(sorted_levers):
-            if values == []:
-                values = [[] for _ in range(len(sorted_levers))] 
-                values[i] = [max(w, h)]
-            else:
-                values[i].append(max(w, h))
+        if position == 'close':
+            for i, (x, y, w, h) in enumerate(sorted_levers):
+                if values == []:
+                    values = [[] for _ in range(len(sorted_levers))] 
+                    values[i] = [max(w, h)]
+                else:
+                    values[i].append(max(w, h))
+        else:
+            # Append the max of width and height for lever levernumber to the values list
+           values.append(max(sorted_levers[lever_number][2], sorted_levers[lever_number][3]))
 
 
-        # Draw bounding boxes on the image
-        for x, y, w, h in sorted_levers:
-            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(image, f'{w} x {h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
-            
-        # Display the image
-        '''plt.figure(figsize=(10, 10))
-        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        plt.axis('off')
-        plt.show()'''
 
-    print(values)
+        test_indices = []
+
+        if lever_number in test_indices:
+            #print('Lever:', lever_number)
+            # Draw the bounding boxes of the levers on the image
+            for x, y, w, h in sorted_levers:
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            # write the high and width of the bounding box on the image
+            for i, (x, y, w, h) in enumerate(sorted_levers):
+                cv2.putText(image, f'{w} x {h} L{i}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+
+
+            # save the image
+            cv2.imwrite('check/test' + str(lever_number) + position + '.jpg', image)
+
+
+
+
+    #print(values)
 
     lever_dimensions = {}
 
     # Calculate the average of the max dimensions for each lever
-    for i, lever_values in enumerate(values):
-        lever_dimensions[f'Lever{i}'] = {
-            'close': int(np.mean(lever_values)),
-            'stop': None,
-            'mid': None,
-            'open': None
-        }
+
+    if position == 'close':
+        for i, lever_values in enumerate(values):
+            lever_dimensions[f'Lever{i}'] = {
+                'close': int(np.mean(lever_values)),
+                'stop': None,
+                'mid': None,
+                'open': None
+            }
+        # Write the lever dimensions to a JSON file
+        with open('lever_dimensions.json', 'w') as f:
+            json.dump(lever_dimensions, f, indent=4)
+    else:
+        # open lever_dimensions.json file and write the mean value for the specific lever and position
+        with open('lever_dimensions.json', 'r+') as f:
+            lever_dimensions = json.load(f)
+            lever_dimensions[f'Lever{lever_number}'][position] = int(np.mean(values))
+            # delete the old content of the file
+            f.seek(0)
+            f.truncate()
+            # write the new content to the file
+            json.dump(lever_dimensions, f, indent=4)
+
+
         
-
-    # Write the lever dimensions to a JSON file
-    with open('lever_dimensions.json', 'w') as f:
-        json.dump(lever_dimensions, f, indent=4)
-        
-    print(lever_dimensions)
-    return lever_dimensions
+    #print(lever_dimensions)
 
 
 
 
-calibrate(image_path_closed)
+image_path_closed = 'IMG/12'
+start_image = 100
+
+calibrate(image_path_closed, 'close', 0)
+
+lever_number = 0
+
+for i in range(1, 31):
+    image_path = 'IMG/' + str((start_image + i))
+    if i % 3 == 1:
+        calibrate(image_path, 'stop', lever_number)
+    elif i % 3 == 2:
+        calibrate(image_path, 'mid', lever_number)
+    else:
+        calibrate(image_path, 'open', lever_number)
+        lever_number += 1
+
+
+
+    
+
+
 
 #findRectangle(image_path, show_image=True)
