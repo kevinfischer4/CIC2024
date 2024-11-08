@@ -64,3 +64,49 @@ def findRectangle(image_path, show_image=False):
         plt.axis('off')
         plt.show()
 
+
+#GPT:
+
+image_path = '/mnt/data/12_1.jpg'
+
+image = cv2.imread(image_path)
+
+# Convert the image to RGB for display purposes if needed
+image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+# Define parameters for red color detection in HSV
+hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+lower_red = np.array([0, 120, 70])
+upper_red = np.array([10, 255, 255])
+mask1 = cv2.inRange(hsv_image, lower_red, upper_red)
+
+# Range for upper red
+lower_red = np.array([170, 120, 70])
+upper_red = np.array([180, 255, 255])
+mask2 = cv2.inRange(hsv_image, lower_red, upper_red)
+
+# Combine both masks
+mask = mask1 + mask2
+
+# Find contours in the mask
+contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Filter contours based on size and sort clockwise starting from top-right
+levers = []
+for contour in contours:
+    x, y, w, h = cv2.boundingRect(contour)
+    if w * h > 50:  # Filter out very small contours
+        levers.append((x, y, w, h))
+
+# Sort the contours in a circular clockwise pattern starting from top-right
+center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
+center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
+sorted_levers = sorted(
+    levers,
+    key=lambda lever: np.arctan2(lever[1] + lever[3] / 2 - center_y, lever[0] + lever[2] / 2 - center_x)
+)
+
+# Prepare JSON with max dimension (either width or height) for each lever
+lever_dimensions = {f"Lever{i}": max(w, h) for i, (x, y, w, h) in enumerate(sorted_levers)}
+lever_dimensions
