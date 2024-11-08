@@ -71,16 +71,13 @@ def findRectangle(image_path, show_image=False):
 image_path = 'IMG/12_1.jpg'
 
 def test(image_path):
-
-
+    # Load the image
     image = cv2.imread(image_path)
 
-    # Convert the image to RGB for display purposes if needed
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
+    # Convert the image to HSV color space for color detection
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Define parameters for red color detection in HSV
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 120, 70])
     upper_red = np.array([10, 255, 255])
     mask1 = cv2.inRange(hsv_image, lower_red, upper_red)
@@ -96,34 +93,34 @@ def test(image_path):
     # Find contours in the mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Filter contours based on size and sort clockwise starting from top-right
+    # Filter contours based on size and store bounding boxes
     levers = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        if w * h > 1750:  # Filter out very small contours
-            # Filter out rectangles that are inside other rectangles
+        if w * h > 50:  # Filter out very small contours
             levers.append((x, y, w, h))
-            print('Lever:', x, y, w, h)
 
-    # Sort the contours in a circular clockwise pattern starting from top-right by using arctan2
-    levers.sort(key=lambda x: np.arctan2(x[1], x[0]))
+    # Calculate the approximate center of the bounding boxes for ordering purposes
+    center_x = np.mean([lever[0] + lever[2] / 2 for lever in levers])
+    center_y = np.mean([lever[1] + lever[3] / 2 for lever in levers])
 
-    # Draw the contours on the image
-    for lever in levers:
-        x, y, w, h = lever
-        cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        # schreibe die Länge und Breite des Rechtecks auf das Bild + Einheit
-        cv2.putText(image_rgb, f'{w} x {h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+    # Find the lever closest to the top-right as the starting point
+    top_right_lever = sorted(levers, key=lambda lever: (-lever[0], lever[1]))[0]
+    top_right_x = top_right_lever[0] + top_right_lever[2] / 2
+    top_right_y = top_right_lever[1] + top_right_lever[3] / 2
 
-    # Display the image
-    plt.figure(figsize=(10, 10))
-    plt.imshow(image_rgb)
-    plt.axis('off')
-    plt.show()
+    # Sort the levers in clockwise order starting from the top-right lever
+    sorted_levers = sorted(
+        levers,
+        key=lambda lever: (
+            np.arctan2(lever[1] + lever[3] / 2 - top_right_y, lever[0] + lever[2] / 2 - top_right_x) % (2 * np.pi)
+        )
+    )
 
-    for(i, lever) in enumerate(levers):
-        x, y, w, h = lever
-        print(f'Lever {i}: x={x}, y={y}, w={w}, h={h}')
+    # Prepare JSON with max dimension (either width or height) for each lever
+    lever_dimensions = {f"Lever{i}": max(w, h) for i, (x, y, w, h) in enumerate(sorted_levers)}
+    print(lever_dimensions)
+
 
 
 
