@@ -23,6 +23,8 @@ def detect_hand_in_image(image):
     else:
         return image, True
     
+
+    
 def analyzeWithMediapipe(image):
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(static_image_mode=True)
