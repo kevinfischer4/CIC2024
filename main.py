@@ -31,7 +31,7 @@ if cali:
 # Start the detection
 # Initialisierung der Zeit
 prev_time = 0
-interval = 5 # Sekunden zwischen den Frames
+interval = 1 # Sekunden zwischen den Frames
 all_closed = False
 
 while True:
