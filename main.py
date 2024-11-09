@@ -53,10 +53,10 @@ while True:
         # Hand erkennen
         frame, no_hands = analyzeWithMediapipe(frame)#detect_hand_in_image(frame)
         if no_hands:
-            all_closed, image = analyze(frame)
+            all_closed, frame = analyze(frame)
 
         # Bild speichern
-        cv2.imwrite('levers/lever_detection' + str(counter) + '.jpg', image)
+        cv2.imwrite('levers/lever_detection' + str(counter) + '.jpg', frame)
         counter += 1
 
 
