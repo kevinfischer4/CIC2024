@@ -12,4 +12,4 @@ def detectHands(frame):
     if results.pose_landmarks:
         mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
         return frame, True
-    return False
+    return frame, False

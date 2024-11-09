@@ -12,6 +12,10 @@ def analyze(image):
             # zeichne ein rotes Rechteck um den Hebel
             cv2.rectangle(image, (lever[0], lever[1]), (lever[0] + lever[2], lever[1] + lever[3]), (0, 0, 255), 2)
             all_closed = False
+        elif len(sorted_levers) > 10:
+            # schreibe eine Warnung auf das Bild
+            cv2.putText(image, "Zu viele Hebel", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            all_closed = False
         else:
             # zeichne ein grünes Rechteck um den Hebel
             cv2.rectangle(image, (lever[0], lever[1]), (lever[0] + lever[2], lever[1] + lever[3]), (0, 255, 0), 2)
