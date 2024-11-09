@@ -4,6 +4,7 @@ from detection import analyze
 import time
 import keyboard
 import cv2
+from handDetection import detectHands
 
 
 START_IMAGE_NUMBER = 13
@@ -33,6 +34,7 @@ if cali:
 prev_time = 0
 interval = 1 # Sekunden zwischen den Frames
 all_closed = False
+no_hands = False
 
 while True:
     # Aktuelle Zeit abrufen
@@ -41,6 +43,9 @@ while True:
     # Prüfen, ob der Intervall verstrichen ist
     if current_time - prev_time >= interval:
         frame = getFrame(True)
+
+        # Hand erkennen
+        frame, no_hands = detectHands(frame)
         
         # Funktion mit dem Frame aufrufen
         all_closed, image = analyze(frame)
