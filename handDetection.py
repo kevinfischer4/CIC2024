@@ -1,15 +1,24 @@
 import mediapipe as mp
+import cv2
 
-def detectHands(frame):
-    # Mediapipe Setup
-    mp_pose = mp.solutions.pose
-    pose = mp_pose.Pose()
-    mp_drawing = mp.solutions.drawing_utils
 
-    # Hier wird die Hand erkannt
-    results = pose.process(frame)
 
-    if results.pose_landmarks:
-        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        return frame, True
-    return frame, False
+# Haarcascade für Handerkennung (muss heruntergeladen werden, wenn noch nicht vorhanden)
+hand_cascade = cv2.CascadeClassifier('hand.xml')  # Beispielpfad, falls verfügbar
+
+def detect_hand_in_image(image):
+    # Bild laden und in Graustufen umwandeln
+    #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Handerkennung durchführen
+    hands = hand_cascade.detectMultiScale(image, 1.1, 5)
+
+    # Überprüfen, ob Hände erkannt wurden
+    if len(hands) > 0:
+        # Hände im Bild markieren
+        for (x, y, w, h) in hands:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 0), 2)
+        print("Hand erkannt")
+        return image, False
+    else:
+        return image, True

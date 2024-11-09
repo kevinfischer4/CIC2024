@@ -4,7 +4,7 @@ from detection import analyze
 import time
 import keyboard
 import cv2
-from handDetection import detectHands
+from handDetection import detect_hand_in_image
 
 
 START_IMAGE_NUMBER = 13
@@ -32,7 +32,7 @@ if cali:
 # Start the detection
 # Initialisierung der Zeit
 prev_time = 0
-interval = 10 # Sekunden zwischen den Frames
+interval = 1 # Sekunden zwischen den Frames
 all_closed = False
 no_hands = False
 
@@ -45,10 +45,13 @@ while True:
         frame = getFrame(True)
 
         # Hand erkennen
-        frame, no_hands = detectHands(frame)
+        frame, no_hands = detect_hand_in_image(frame)
+        if no_hands:
+            all_closed, image = analyze(frame)
+
         
         # Funktion mit dem Frame aufrufen
-        all_closed, image = analyze(frame)
+    
 
         # Bild anzeigen
         cv2.imshow('image', image)
