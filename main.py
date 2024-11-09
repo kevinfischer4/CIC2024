@@ -32,9 +32,10 @@ if cali:
 # Start the detection
 # Initialisierung der Zeit
 prev_time = 0
-interval = 1 # Sekunden zwischen den Frames
+interval = 3 # Sekunden zwischen den Frames
 all_closed = False
 no_hands = False
+counter = 0
 
 while True:
     # Aktuelle Zeit abrufen
@@ -48,6 +49,11 @@ while True:
         frame, no_hands = analyzeWithMediapipe(frame)#detect_hand_in_image(frame)
         if no_hands:
             all_closed, image = analyze(frame)
+
+        # Bild speichern
+        cv2.imwrite('levers/lever_detection' + str(counter) + '.jpg', image)
+        counter += 1
+
 
         # Bild anzeigen
         cv2.imshow('image', frame)

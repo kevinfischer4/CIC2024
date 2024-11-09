@@ -23,6 +23,8 @@ def detect_hand_in_image(image):
     else:
         return image, True
     
+
+    
 def analyzeWithMediapipe(image):
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(static_image_mode=True)
@@ -40,6 +42,8 @@ def analyzeWithMediapipe(image):
         for handLms in result.multi_hand_landmarks:
             # Zeichnen der Handlandmarken auf dem Bild
             mp_draw.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
+        # Speichern des Bildes
+        #cv2.imwrite("hand_detected.jpg", image)
         return image, False
     else:
         print("Keine Hand erkannt")
