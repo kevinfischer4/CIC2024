@@ -22,3 +22,30 @@ def detect_hand_in_image(image):
         return image, False
     else:
         return image, True
+    
+def analyzeWithMediapipe(image):
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(static_image_mode=True)
+    mp_draw = mp.solutions.drawing_utils
+
+    # Laden Sie Ihr Bild
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Verarbeiten des Bildes
+    result = hands.process(image_rgb)
+
+    # Überprüfen, ob Hände erkannt wurden
+    if result.multi_hand_landmarks:
+        print("Hand erkannt")
+        for handLms in result.multi_hand_landmarks:
+            # Zeichnen der Handlandmarken auf dem Bild
+            mp_draw.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
+        return image, False
+    else:
+        print("Keine Hand erkannt")
+        return image, True
+
+    # Anzeigen des Bildes
+    cv2.imshow("Bild mit erkannter Hand", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

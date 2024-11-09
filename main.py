@@ -4,7 +4,7 @@ from detection import analyze
 import time
 import keyboard
 import cv2
-from handDetection import detect_hand_in_image
+from handDetection import detect_hand_in_image,analyzeWithMediapipe
 
 
 START_IMAGE_NUMBER = 13
@@ -42,19 +42,15 @@ while True:
 
     # Prüfen, ob der Intervall verstrichen ist
     if current_time - prev_time >= interval:
-        frame = getFrame(True)
+        frame = getFrame(False)
 
         # Hand erkennen
-        frame, no_hands = detect_hand_in_image(frame)
+        frame, no_hands = analyzeWithMediapipe(frame)#detect_hand_in_image(frame)
         if no_hands:
             all_closed, image = analyze(frame)
 
-        
-        # Funktion mit dem Frame aufrufen
-    
-
         # Bild anzeigen
-        cv2.imshow('image', image)
+        cv2.imshow('image', frame)
         cv2.waitKey(1)
 
         # Zeit aktualisieren
