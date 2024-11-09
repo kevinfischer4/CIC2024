@@ -1,10 +1,11 @@
 from calibration import calibrate
-from videoStreamMock import getFrame, process_frame
+from videoStreamMock import getFrame
+from videoStream import getStreamFrame
 from detection import analyze
 import time
 import keyboard
 import cv2
-from handDetection import detect_hand_in_image,analyzeWithMediapipe
+from handDetection import detect_hand_in_image, analyzeWithMediapipe
 
 
 START_IMAGE_NUMBER = 13
@@ -35,6 +36,7 @@ prev_time = 0
 interval = 1 # Sekunden zwischen den Frames
 all_closed = False
 no_hands = False
+stream = False
 
 while True:
     # Aktuelle Zeit abrufen
@@ -42,7 +44,10 @@ while True:
 
     # Prüfen, ob der Intervall verstrichen ist
     if current_time - prev_time >= interval:
-        frame = getFrame(False)
+        if stream:
+            frame = getStreamFrame(False)
+        else:
+            frame = getFrame(False)
 
         # Hand erkennen
         frame, no_hands = analyzeWithMediapipe(frame)#detect_hand_in_image(frame)

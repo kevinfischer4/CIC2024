@@ -21,12 +21,6 @@ def getFrame(show_frame=False):
     
     return frame
 
-# Funktion, die aufgerufen wird, um das Bild zu verarbeiten
-def process_frame(frame):
-    # Beispiel: Bild anzeigen
-    cv2.imshow('Frame', frame)
-    # Hier kannst du deine eigene Verarbeitung einfügen
-    print("Bild verarbeitet")
 
 # Ordnerpfad für die Bilder
 image_folder = 'testImages'

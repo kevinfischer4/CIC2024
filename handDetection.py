@@ -40,6 +40,7 @@ def analyzeWithMediapipe(image):
         for handLms in result.multi_hand_landmarks:
             # Zeichnen der Handlandmarken auf dem Bild
             mp_draw.draw_landmarks(image, handLms, mp_hands.HAND_CONNECTIONS)
+        
         return image, False
     else:
         print("Keine Hand erkannt")
