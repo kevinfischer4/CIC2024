@@ -30,7 +30,7 @@ def findSortedRectangles(image, show_image=False):
     levers = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        if w * h > 1500:  # Filter out very small contours
+        if w * h > 1750:  # Filter out very small contours
             levers.append((x, y, w, h))
 
 

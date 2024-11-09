@@ -2,6 +2,8 @@ from calibration import calibrate
 from videoStreamMock import getFrame, process_frame
 from detection import analyze
 import time
+import keyboard
+import cv2
 
 
 START_IMAGE_NUMBER = 13
@@ -9,25 +11,28 @@ REFERENCE_IMAGE_NUMBER = 12
 
 # calibrate the closed position
 image_path_closed = 'IMG/12'
-calibrate(image_path_closed, 'close', 0)
+cali = False
+if cali:
+    calibrate(image_path_closed, 'close', 0)
 
-# calibrate the other positions
-start_image = 100
-lever_number = 0
-for i in range(1, 31):
-    image_path = 'IMG/' + str((start_image + i))
-    if i % 3 == 1:
-        calibrate(image_path, 'stop', lever_number)
-    elif i % 3 == 2:
-        calibrate(image_path, 'mid', lever_number)
-    else:
-        calibrate(image_path, 'open', lever_number)
-        lever_number += 1
+    # calibrate the other positions
+    start_image = 100
+    lever_number = 0
+    for i in range(1, 31):
+        image_path = 'IMG/' + str((start_image + i))
+        if i % 3 == 1:
+            calibrate(image_path, 'stop', lever_number)
+        elif i % 3 == 2:
+            calibrate(image_path, 'mid', lever_number)
+        else:
+            calibrate(image_path, 'open', lever_number)
+            lever_number += 1
 
 # Start the detection
 # Initialisierung der Zeit
 prev_time = 0
-interval = 10  # Sekunden zwischen den Frames
+interval = 5 # Sekunden zwischen den Frames
+all_closed = False
 
 while True:
     # Aktuelle Zeit abrufen
@@ -38,7 +43,20 @@ while True:
         frame = getFrame(True)
         
         # Funktion mit dem Frame aufrufen
-        analyze(frame)
+        all_closed, image = analyze(frame)
+
+        # Bild anzeigen
+        cv2.imshow('image', image)
+        cv2.waitKey(1)
 
         # Zeit aktualisieren
         prev_time = current_time
+
+    # Wenn Taste gedrückt wird, beenden
+    if keyboard.is_pressed('space'):
+        break
+
+    
+
+
+

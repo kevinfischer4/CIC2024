@@ -29,7 +29,7 @@ def process_frame(frame):
     print("Bild verarbeitet")
 
 # Ordnerpfad für die Bilder
-image_folder = 'IMG'
+image_folder = 'testImages'
 
 # Überprüfen, ob der Ordner existiert
 if not os.path.isdir(image_folder):
