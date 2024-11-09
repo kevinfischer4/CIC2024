@@ -8,7 +8,8 @@ def calibrate(image_path_closed, position, lever_number):
     values = []
 
     for i in range(1,4):
-        sorted_levers = findSortedRectangles(image_path_closed, i, show_image=False)
+        image = getCvImage(image_path_closed, i)
+        sorted_levers = findSortedRectangles(image, show_image=False)
 
         # Create List with max dimension (either width or height) for each lever
         if position == 'close':

@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 from getImage import getCvImage
 
-def findSortedRectangles(image_path_closed, i, show_image=False):
+def findSortedRectangles(image, show_image=False):
 
     # Load the image
-    image = getCvImage(image_path_closed, i)
+    #image = getCvImage(image_path_closed, i)
 
     # Convert the image to HSV color space for color detection
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
