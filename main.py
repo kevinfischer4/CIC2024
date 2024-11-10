@@ -33,7 +33,7 @@ if cali:
 # Start the detection
 # Initialisierung der Zeit
 prev_time = 0
-interval = 3 # Sekunden zwischen den Frames
+interval = 5 # Sekunden zwischen den Frames
 all_closed = False
 no_hands = False
 counter = 0
